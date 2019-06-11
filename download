@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# -e makes the shell exit immediately whenever something returns an error
+set -e
+
+# Data directories
+ROOT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+DATA_DIR=$ROOT_DIR/data
+cd $ROOT_DIR
+
+if [[ ! -d "$DATA_DIR/writing-prompts" ]]; then
+    echo "Downloading Reddit writing prompt dataset."
+    URL=https://dl.fbaipublicfiles.com/fairseq/data/writingPrompts.tar.gz
+    wget --continue -P $DATA_DIR/writing-prompts $URL
+    cd $DATA_DIR/writing-prompts
+    if [[ $OSTYPE == linux-gnu ]]; then
+        # The warning arg is needed for tarballs created on Mac OS
+        tar --strip-components 1 --warning no-unknown-keyword -xvzf writingPrompts.tar.gz
+    elif [[ $OSTYPE == darwin* ]]; then
+        tar --strip-components 1 -xvzf writingPrompts.tar.gz
+    fi
+    rm -fv writingPrompts.tar.gz
+    cd $ROOT_DIR
+else
+    echo "The directory $DATA_DIR/writing-prompts already exists."
+fi

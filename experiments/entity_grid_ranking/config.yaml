@@ -1,0 +1,41 @@
+# Number of trainable parameters:
+corpus:
+  type: grids_ranked
+  data_dir: "./data/writing-prompts"
+  lazy: true
+  indexer:
+    tokens:
+      type: single_id
+  transpose: true
+vocabulary:
+  directory_path: "./experiments/grid-vocab"
+model:
+  type: ranked_neural_grid
+iterator:
+  type: bucket
+  batch_size: 32
+  max_instances_in_memory: 16384
+  biggest_batch_first: false
+  sorting_keys:
+    - ["grids", "list_tokens_length"]
+  maximum_samples_per_batch: ["list_tokens_length", 512]
+  cache_instances: false
+trainer:
+  type: trainer_fp16_single
+  fp16: false
+  optimizer:
+    type: bert_adam
+    lr: 0.001
+    weight_decay: 0.0001
+    warmup: 0.05
+    # Every epoch of training takes 2 hours and 35,973 iterations.
+    t_total: 290000
+    max_grad_norm: 0.1
+  num_epochs: 8
+  patience: 8
+  cuda_device: 0
+  shuffle: true
+  summary_interval: 100
+  num_serialized_models_to_keep: 32
+evaluate_on_test: true
+batch_weight_key: sample_size
