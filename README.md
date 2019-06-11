@@ -1,6 +1,12 @@
 # Text Coherence Experiments
 
 This repo contains a collection of experiments related to text coherence.
+In particular we explored whether neural entity grid models can be used
+to give a passage of text a meaningful coherence score. The model is trained
+using ranking loss, in which a entity grid of the original text is ranked
+higher than a grid with some noise added to it. An example of noise could be
+randomly moving an entity to a different place in the text, or adding a random
+entity mention.
 
 ## Setting Up
 
@@ -66,4 +72,29 @@ python -m coherence.annotate.generate_grid_berts
 
 # Training entity grid model
 CUDA_VISIBLE_DEVICES=0 python -m coherence.commands train experiments/entity_grid_ranking/config.yaml -fb
+
+# Evaluate the model
+CUDA_VISIBLE_DEVICES=0 python -m coherence.commands evaluate experiments/entity_grid_ranking/model.tar.gz
 ```
+
+## Results
+
+In the table below, each row is a possible type of noise that we could add to
+the grid. The second column shows the percentage of grids in each category that
+are ranked lower than the original grid. All examples are taken from the
+validation set. These results match what we would like to happen. That is,
+the more noise we add to the grid, the lower the score it would get, compared
+to the original grid.
+
+|                                     | % that ranked lower (validation) |
+| ----------------------------------- | -------------------------------- |
+| Add 5 mentions of existing entities | 90%                              |
+| Add a mention of an existing entity | 73%                              |
+| Swap two sentences                  | 65%                              |
+| Turn off one random entry           | 58%                              |
+| Turn off two random entries         | 63%                              |
+| Noisy Grid (5% randomised)          | 75%                              |
+| Noisy Grid (10% randomised)         | 87%                              |
+| Noisy Grid (20% randomised)         | 93%                              |
+| Noisy Grid (30% randomised)         | 96%                              |
+| Randomly Shuffled Sentences         | 92%                              |
